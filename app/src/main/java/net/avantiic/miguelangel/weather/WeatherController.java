@@ -14,6 +14,15 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONObject;
+
+import cz.msebera.android.httpclient.Header;
 
 
 public class WeatherController extends AppCompatActivity {
@@ -29,7 +38,6 @@ public class WeatherController extends AppCompatActivity {
     // Distance between location updates (1000m or 1km)
     final float MIN_DISTANCE = 1000;
 
-    // TODO: Set LOCATION_PROVIDER here:
     String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
 
     // Member Variables:
@@ -37,7 +45,6 @@ public class WeatherController extends AppCompatActivity {
     ImageView mWeatherImage;
     TextView mTemperatureLabel;
 
-    // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mLocationManager;
     LocationListener mLocationListener;
 
@@ -58,9 +65,6 @@ public class WeatherController extends AppCompatActivity {
 
     }
 
-
-    // TODO: Add onResume() here:
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -71,7 +75,6 @@ public class WeatherController extends AppCompatActivity {
     // TODO: Add getWeatherForNewCity(String city) here:
 
 
-    // TODO: Add getWeatherForCurrentLocation() here:
     private void getWeatherForCurrentLocation() {
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
@@ -82,6 +85,13 @@ public class WeatherController extends AppCompatActivity {
                 String latitude = String.valueOf(location.getLatitude());
                 Log.d("Clima", "latitude: " + latitude);
                 Log.d("Clima", "longitude: " + longitude);
+
+                RequestParams params = new RequestParams();
+                params.put("lat", latitude);
+                params.put("lon", longitude);
+                params.put("appid", APP_ID);
+                getDataFromURL(WEATHER_URL, params);
+
             }
 
             @Override
@@ -129,8 +139,22 @@ public class WeatherController extends AppCompatActivity {
         }
     }
 
-    // TODO: Add letsDoSomeNetworking(RequestParams params) here:
+    private void getDataFromURL(String url, RequestParams params) {
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(url, params, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                Log.d("Clima", "Success! JSON: " + response.toString());
+            }
 
+            @Override
+            public void onFailure(int statusCode, Header[] header, Throwable e, JSONObject response) {
+                Log.d("Clima", "Fail " + e.toString());
+                Log.d("Clima", "Status code" + statusCode);
+                Toast.makeText(WeatherController.this, "Request Failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
     // TODO: Add updateUI() here:
@@ -138,7 +162,6 @@ public class WeatherController extends AppCompatActivity {
 
 
     // TODO: Add onPause() here:
-
 
 
 }
